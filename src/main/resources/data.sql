@@ -1,0 +1,1 @@
+insert into MOVIES (TITLE,YEAR,IMDBID,TYPE,POSTER) values ('Batman','1990','1','1','Batman');
