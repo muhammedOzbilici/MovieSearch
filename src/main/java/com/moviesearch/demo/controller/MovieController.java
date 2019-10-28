@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -21,22 +18,23 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/movies")
-public class MainController {
+@CrossOrigin(origins = { "http://localhost:8080","http://localhost:3000"})
+public class MovieController {
 
     private final MovieServiceImpl movieService;
 
     @Autowired
-    MainController(MovieServiceImpl movieService) {
+    MovieController(MovieServiceImpl movieService) {
         this.movieService = movieService;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
+    private static final Logger logger = LoggerFactory.getLogger(MovieController.class);
 
     @Value("${OMDB_API_KEY}")
     private String omdbKey;
 
-    @GetMapping(value = "/search/{title}")
-    public ResponseEntity<?> getMovies(@PathVariable String title) {
+    @GetMapping("/search/{title}")
+    public ResponseEntity<List<Movie>> getMovies(@PathVariable String title) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json; charset=UTF-8");
         List<Movie> foundedMovieList = movieService.findMovieByTitle(title);
@@ -48,6 +46,7 @@ public class MainController {
             RestTemplate omdbTemplate = new RestTemplate();
             Map<String, ArrayList<Map<String, String>>> omdbTemplateResult = omdbTemplate.getForObject(omdbURL, Map.class);
             ArrayList<Map<String, String>> omdbMovies = omdbTemplateResult.get("Search");
+            ArrayList<Movie> ombdMoviesList = new ArrayList();
             if (omdbMovies != null) {
                 logger.info("Found " + omdbMovies.size() + " movie(s) at OMDB with title '" + title + "'");
                 try {
@@ -59,10 +58,11 @@ public class MainController {
                         movie.setYear(omdbMovie.get("Year"));
                         movie.setType(omdbMovie.get("Type"));
                         movieService.save(movie);
+                        ombdMoviesList.add(movie);
                     }
-                    return new ResponseEntity<>("Success", headers, HttpStatus.CREATED);
+                    return new ResponseEntity<>(ombdMoviesList, HttpStatus.OK);
                 } catch (Exception e) {
-                    return new ResponseEntity<>("Error", headers, HttpStatus.INTERNAL_SERVER_ERROR);
+                    return new ResponseEntity<>(headers, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             } else {
                 logger.info("Couldn't find at OMDB with title '" + title + "'");
@@ -70,7 +70,7 @@ public class MainController {
 
         }
         logger.info("Found '" + foundedMovieList.size() + "' movie(s) on database with title '" + title + "'");
-        return new ResponseEntity<>("Success", headers, HttpStatus.CREATED);
+        return new ResponseEntity<>(foundedMovieList, HttpStatus.OK);
     }
 
 }

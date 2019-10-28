@@ -1,1 +1,1 @@
-insert into MOVIES (TITLE,YEAR,IMDBID,TYPE,POSTER) values ('Batman','1990','1','1','Batman');
+insert into MOVIES (IMDBID,TITLE,YEAR,TYPE,POSTER) values ('tt1','Batman','1990','1','Batman');
