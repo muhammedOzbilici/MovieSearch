@@ -2,7 +2,11 @@
 
 This is an application for searching movies on OMDB api.  
 Found movies will populated to db (H2 database) and it will be cached for 10 minutes.  
-If the movie that you are searching is not in db, then it will search through OMDB api.    
+If the movie that you are searching is not in db, then it will search through OMDB api.   
+
+Reach github link
+
+https://github.com/muhammedOzbilici/moviesearch-react
 
 
 docker run :  
